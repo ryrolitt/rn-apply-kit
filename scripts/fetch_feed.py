@@ -2,6 +2,8 @@
 """Pull the openings feed and merge it into tracker.json. No LLM, no tokens.
 
 The feed (rn-openings-feed/openings.json) is regenerated about hourly by its owner's tooling.
+The repo is private: the feed is read through the GitHub CLI (`gh auth login` once, done in
+session 1). The raw URL is only a fallback for a public mirror.
 This script keeps YOUR state: a posting's `status`, `status_at`, `notes` and `first_seen_at`
 survive every pull. Feed fields are refreshed in place. Ids that leave the feed are kept with
 `in_feed: false` so your history is never lost.
@@ -16,9 +18,10 @@ import sys
 
 KIT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TRACKER = os.path.join(KIT, "tracker.json")
+FEED_REPO = os.environ.get("RN_FEED_REPO", "ryrolitt/rn-openings-feed")
 FEED_URL = os.environ.get(
     "RN_FEED_URL",
-    "https://raw.githubusercontent.com/ryrolitt/rn-openings-feed/main/openings.json",
+    f"https://raw.githubusercontent.com/{FEED_REPO}/main/openings.json",
 )
 FEED_FIELDS_KEPT_LOCAL = ("status", "status_at", "notes", "first_seen_at", "package_dir")
 
@@ -30,6 +33,15 @@ def now():
 def load_feed(path=None):
     if path:
         return json.load(open(path))
+    import shutil
+    import subprocess
+    if shutil.which("gh"):
+        r = subprocess.run(["gh", "api", "-H", "Accept: application/vnd.github.raw",
+                            f"/repos/{FEED_REPO}/contents/openings.json"],
+                           capture_output=True, text=True, timeout=90)
+        if r.returncode == 0 and r.stdout.strip():
+            return json.loads(r.stdout)
+        print(f"fetch_feed: gh api failed ({r.stderr.strip()[:160]}); trying the raw URL", file=sys.stderr)
     import urllib.request
     req = urllib.request.Request(FEED_URL, headers={"User-Agent": "rn-apply-kit fetch_feed"})
     with urllib.request.urlopen(req, timeout=60) as r:
