@@ -26,6 +26,8 @@ is type your Mac password if Homebrew's installer needs it.
 | `scripts/status.py` | The one way to change a posting's status. |
 | `scripts/verify_url.py` | Checks a posting is still live and reads a close date from the page. |
 | `scripts/export_pdf.sh` | docx to PDF with LibreOffice, and proves the PDF changed. |
+| `scripts/update.sh` | Pulls kit updates; runs daily. Your files are never touched. |
+| `scripts/set-token.sh` | Stores the read-only token once the repos go private. |
 | `.claude/commands/` | `/intake-profile`, `/set-preferences`, `/start-next-app`, `/close-out-app`. |
 | `.claude/skills/web-forms/` | How to drive ATS portals (Workday, UltiPro, CalCareers) without wrong values. |
 | `templates/profile/` | The files intake fills in: your facts, your anecdotes, your voice, your references. |
@@ -52,6 +54,13 @@ the browser profile) is gitignored. `git pull` brings kit fixes and can never to
 needed to read it.
 A row is a pointer; every date and requirement is verified on the employer's page before
 anything is built on it.
+
+## Updates, and when the repos go private
+
+`scripts/update.sh` runs every morning before the ranking and pulls any kit fixes. When your
+colleague makes the two repos private, they send you a read-only token (it can only read these
+two repositories). Paste it into Claude or run `scripts/set-token.sh <token>` yourself; after
+that, updates and the feed keep working with no GitHub account on your side.
 
 ## Skills this relies on
 

@@ -2,8 +2,9 @@
 """Pull the openings feed and merge it into tracker.json. No LLM, no tokens.
 
 The feed (rn-openings-feed/openings.json) is regenerated about hourly by its owner's tooling.
-The repo is public, so the raw URL needs no account. If it ever goes private, the GitHub CLI
-(`gh auth login` once) is the fallback path below.
+While the repo is public the raw URL needs no account. Once it is private, the read-only token
+stored by scripts/set-token.sh (~/.config/rn-apply-kit/token) is used on the GitHub API; the
+GitHub CLI is a last fallback for anyone who has it.
 This script keeps YOUR state: a posting's `status`, `status_at`, `notes` and `first_seen_at`
 survive every pull. Feed fields are refreshed in place. Ids that leave the feed are kept with
 `in_feed: false` so your history is never lost.
@@ -23,6 +24,7 @@ FEED_URL = os.environ.get(
     "RN_FEED_URL",
     f"https://raw.githubusercontent.com/{FEED_REPO}/main/openings.json",
 )
+TOKEN_FILE = os.path.expanduser("~/.config/rn-apply-kit/token")
 FEED_FIELDS_KEPT_LOCAL = ("status", "status_at", "notes", "first_seen_at", "package_dir")
 
 
@@ -36,19 +38,32 @@ def load_feed(path=None):
     import shutil
     import subprocess
     import urllib.request
+    errors = []
+    if os.path.exists(TOKEN_FILE):
+        token = open(TOKEN_FILE).read().strip()
+        req = urllib.request.Request(
+            f"https://api.github.com/repos/{FEED_REPO}/contents/openings.json",
+            headers={"User-Agent": "rn-apply-kit fetch_feed", "Accept": "application/vnd.github.raw",
+                     "Authorization": f"Bearer {token}"})
+        try:
+            with urllib.request.urlopen(req, timeout=60) as r:
+                return json.load(r)
+        except Exception as e:
+            errors.append(f"token: {e}")
     try:
         req = urllib.request.Request(FEED_URL, headers={"User-Agent": "rn-apply-kit fetch_feed"})
         with urllib.request.urlopen(req, timeout=60) as r:
             return json.load(r)
     except Exception as e:
-        err = e
+        errors.append(f"raw: {e}")
     if shutil.which("gh"):
         r = subprocess.run(["gh", "api", "-H", "Accept: application/vnd.github.raw",
                             f"/repos/{FEED_REPO}/contents/openings.json"],
                            capture_output=True, text=True, timeout=90)
         if r.returncode == 0 and r.stdout.strip():
             return json.loads(r.stdout)
-    raise err
+        errors.append(f"gh: {r.stderr.strip()[:120]}")
+    raise RuntimeError("; ".join(errors) + " (private repo? run scripts/set-token.sh <token>)")
 
 
 def load_tracker():

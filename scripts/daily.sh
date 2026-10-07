@@ -7,6 +7,7 @@ PY="$KIT/.venv/bin/python3"
 [ -x "$PY" ] || PY="$(command -v python3)"
 mkdir -p "$KIT/logs"
 echo "[$(date '+%Y-%m-%d %H:%M')] daily start"
+"$KIT/scripts/update.sh"
 "$PY" "$KIT/scripts/fetch_feed.py" || echo "fetch failed; ranking the last tracker"
 "$PY" "$KIT/scripts/rank.py" --top 10
 echo "[$(date '+%Y-%m-%d %H:%M')] daily end"
