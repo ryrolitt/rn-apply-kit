@@ -15,7 +15,7 @@ if ! command -v brew >/dev/null 2>&1; then
   for b in /opt/homebrew/bin/brew /usr/local/bin/brew; do [ -x "$b" ] && eval "$("$b" shellenv)"; done
 fi
 if ! command -v brew >/dev/null 2>&1; then
-  echo "  MISSING Homebrew. Its installer needs the Mac login password, so it runs in the applicant's own Terminal:"
+  echo "  MISSING Homebrew. Its installer asks for the Mac login password, so run it in the app's Terminal panel where the applicant can type it:"
   echo '          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"'
   echo "          then run ./install.sh again."
   exit 1

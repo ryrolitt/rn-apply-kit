@@ -11,9 +11,10 @@ never touch Claude.
 ## Before you open Claude (2 minutes, once)
 
 Install the Claude desktop app, sign in with your Pro account, open the Code tab, and paste
-the kickoff prompt your colleague sent you. Claude installs everything else (Homebrew tools,
-LibreOffice, Chrome, the Playwright browser). The only thing it will ask you to do yourself
-is type your Mac password if Homebrew's installer needs it.
+the kickoff prompt your colleague sent you. Claude installs everything else (Homebrew itself,
+its tools, LibreOffice, Chrome, the Playwright browser), running the installers in the app's
+Terminal panel. The only thing you do yourself is type your Mac password there when an
+installer asks for it.
 
 ## What is in here
 
