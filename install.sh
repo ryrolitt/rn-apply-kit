@@ -1,7 +1,7 @@
 #!/bin/bash
 # One-time setup for rn-apply-kit. Safe to re-run. Installs what is missing through Homebrew.
 # Claude runs this; the applicant is asked only for a password when the Homebrew installer
-# needs one, and for the GitHub sign-in click.
+# needs one.
 set -u
 KIT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$KIT"
@@ -24,20 +24,12 @@ ok "Homebrew"
 command -v node >/dev/null 2>&1 && ok "node $(node --version)" || inst "node" "node"
 if command -v python3 >/dev/null 2>&1 && [ "$(python3 -c 'import sys;print(sys.version_info[0]*100+sys.version_info[1])')" -ge 311 ]; then ok "python3 $(python3 --version | cut -d' ' -f2)"; else inst "python3" "python"; fi
 command -v pdftotext >/dev/null 2>&1 && ok "poppler (pdftotext)" || inst "poppler" "poppler"
-command -v gh >/dev/null 2>&1 && ok "GitHub CLI" || inst "GitHub CLI" "gh"
 if command -v soffice >/dev/null 2>&1 || [ -x /Applications/LibreOffice.app/Contents/MacOS/soffice ]; then ok "LibreOffice"; else inst "LibreOffice" "--cask libreoffice"; fi
 [ -d "/Applications/Google Chrome.app" ] && ok "Google Chrome" || inst "Google Chrome" "--cask google-chrome"
 [ "$BLOCKED" = 1 ] && { echo "Fix the failed installs above, then run ./install.sh again."; exit 1; }
 
-echo "2. GitHub sign-in (the kit and the feed are private repos you were invited to)"
-if gh auth status >/dev/null 2>&1; then ok "signed in as $(gh api user -q .login 2>/dev/null)"; else
-  echo "  NOT SIGNED IN. Run: gh auth login --web --git-protocol https"
-  echo "          (opens the browser; the applicant signs in and approves. Claude never types the password.)"
-  BLOCKED=1
-fi
-if git -C "$KIT" remote get-url origin >/dev/null 2>&1; then
-  git -C "$KIT" ls-remote --exit-code origin HEAD >/dev/null 2>&1 && ok "kit repo reachable" || { echo "  cannot reach the kit repo: accept the GitHub invitation (github.com/notifications), then re-run"; BLOCKED=1; }
-fi
+echo "2. Feed reachable"
+if curl -fsS -o /dev/null --max-time 30 "https://raw.githubusercontent.com/ryrolitt/rn-openings-feed/main/openings.json"; then ok "openings feed"; else echo "  cannot reach the feed (network? repo moved?); the daily job will retry"; fi
 
 echo "3. Python environment"
 if [ ! -x .venv/bin/python3 ]; then python3 -m venv .venv || { echo "venv failed"; exit 1; }; fi
@@ -57,7 +49,7 @@ mkdir -p "Master Materials" Applications
 echo "6. First pull and ranking"
 if [ "$BLOCKED" = 0 ]; then
   .venv/bin/python3 scripts/fetch_feed.py && .venv/bin/python3 scripts/rank.py --top 5 || echo "  (feed pull or ranking failed; the daily job will retry)"
-else echo "  skipped until the GitHub sign-in above is done"; fi
+else echo "  skipped; fix the step above first"; fi
 
 echo "7. Daily job (cron, 07:45)"
 LINE="45 7 * * * $KIT/scripts/daily.sh >> $KIT/logs/daily.log 2>&1"

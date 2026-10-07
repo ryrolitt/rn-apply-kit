@@ -8,16 +8,12 @@ entry) while you keep the Submit click.
 Two setup sessions, then your Claude usage goes to applications. The daily pull and ranking
 never touch Claude.
 
-## Before you open Claude (5 minutes, once)
+## Before you open Claude (2 minutes, once)
 
-1. A free GitHub account (github.com/signup) if you do not have one; the kit and the feed are
-   private repos you are invited to. Accept the invitation email.
-2. The Claude desktop app, signed in with your Pro account, Code tab open.
-
-That is all. Paste the kickoff prompt your colleague sent you. Claude installs the rest
-(Homebrew tools, LibreOffice, Chrome, the Playwright browser) and asks you only for two
-things it cannot do itself: your Mac password if Homebrew's installer needs it, and the
-GitHub sign-in click in your browser.
+Install the Claude desktop app, sign in with your Pro account, open the Code tab, and paste
+the kickoff prompt your colleague sent you. Claude installs everything else (Homebrew tools,
+LibreOffice, Chrome, the Playwright browser). The only thing it will ask you to do yourself
+is type your Mac password if Homebrew's installer needs it.
 
 ## What is in here
 
@@ -52,8 +48,8 @@ the browser profile) is gitignored. `git pull` brings kit fixes and can never to
 
 ## Feed
 
-`github.com/ryrolitt/rn-openings-feed` (private, you are a collaborator): postings only,
-regenerated about hourly, read through the GitHub CLI.
+`github.com/ryrolitt/rn-openings-feed`: postings only, regenerated about hourly, no account
+needed to read it.
 A row is a pointer; every date and requirement is verified on the employer's page before
 anything is built on it.
 
