@@ -1,6 +1,7 @@
 #!/bin/bash
 # Daily pull and rank. No Claude, no tokens. Installed into cron by install.sh.
 set -u
+export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"   # cron has no Homebrew on PATH; gh lives there
 KIT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PY="$KIT/.venv/bin/python3"
 [ -x "$PY" ] || PY="$(command -v python3)"
