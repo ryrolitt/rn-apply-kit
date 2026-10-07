@@ -27,6 +27,7 @@ installer asks for it.
 | `scripts/status.py` | The one way to change a posting's status. |
 | `scripts/verify_url.py` | Checks a posting is still live and reads a close date from the page. |
 | `scripts/export_pdf.sh` | docx to PDF with LibreOffice, and proves the PDF changed. |
+| `scripts/report.sh` | Emails your colleague a question or a problem report; opens a draft, you click Send. |
 | `scripts/update.sh` | Pulls kit updates; runs daily. Your files are never touched. |
 | `scripts/set-token.sh` | Stores the read-only token once the repos go private. |
 | `.claude/commands/` | `/intake-profile`, `/set-preferences`, `/start-next-app`, `/close-out-app`. |

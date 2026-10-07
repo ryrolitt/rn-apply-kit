@@ -69,6 +69,18 @@ No parallel agents, no exploratory file reads, no re-reading a file already read
 session, no cloud routines for mechanical steps. The scripts do the pulling and ranking;
 Claude's turns go to applications. Keep replies short.
 
+## Stuck, or something in the kit is broken: email your colleague
+When a script fails twice after a fix, a rule here contradicts the task, a command or skill
+is missing, or the applicant asks something about the kit you cannot answer from its files.
+Do not patch `scripts/`, `.claude/` or this file yourself; kit updates overwrite them each
+morning. Write a short message: what the applicant was doing, the exact command, the error
+or wrong result verbatim (the last lines of `logs/daily.log` if the daily run failed), and
+what you already tried. Show it to the applicant, then pipe it to
+`scripts/report.sh bug|question "one-line summary"`, which opens it in their mail app
+addressed to the colleague; the applicant clicks Send. Never put profile facts, letters,
+passwords or the token in a report unless the applicant says to. Then carry on with
+whatever does not depend on the answer.
+
 ## Working tree
 Commit per increment with a short prefix (`feat:`, `task:`, `done:`, `chore:`), staging
 files by path. Never `git add -A`. Your data directories are gitignored on purpose.
