@@ -1,0 +1,51 @@
+# preferences.toml: how rank.py orders the openings for YOU.
+# Written by /set-preferences from your answers. Re-run that command to change it.
+# Matching is case-insensitive substring on the posting's title, location and the
+# employer's own posting text; "specialties" use the synonym table in scripts/rank.py.
+
+[home]
+city = "Oakland, CA"
+max_commute_minutes = 60        # informational; the ranker uses the location lists below
+
+[locations]
+preferred = ["Oakland", "Berkeley", "San Francisco", "Walnut Creek"]
+acceptable = ["San Jose", "Santa Rosa", "Vallejo"]
+excluded = ["Sacramento", "Modesto"]
+
+[specialties]
+# first is strongest; points fall off down the list
+ranked = ["psych", "emergency", "telemetry", "med-surg", "icu"]
+excluded = ["or"]
+
+[setting]
+prefer = "inpatient"            # inpatient | outpatient | any
+
+[schedule]
+prefer = ["nights", "full-time"]
+avoid = ["per diem"]
+
+[employers]
+preferred = ["Kaiser", "UCSF"]
+excluded = []
+
+[role_type]
+residency_weight = 30           # new-grad residency programs and their windows
+direct_hire_weight = 10
+
+[eligibility]
+years_experience = 0            # postings that require more are excluded with the quote shown
+hard_exclude_over_experience = true
+license_state = "CA"
+
+[weights]
+specialty_first = 40
+location_preferred = 20
+location_acceptable = 5
+employer_preferred = 15
+new_grad_ok = 25
+setting = 10
+schedule = 5
+closing_soon = 20               # close date within 14 days
+tracked_verified = 10           # entries whose close date was read on the employer page
+recency = 10                    # found within 7 days
+bh_tag = 0

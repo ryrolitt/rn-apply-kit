@@ -1,0 +1,16 @@
+# Your data never goes into this repo. Pulling kit updates can never touch these.
+profile/
+Master Materials/
+Applications/
+tracker.json
+ranked.json
+ranked.html
+preferences.toml
+.mcp.json
+logs/
+output/
+.venv/
+node_modules/
+.DS_Store
+__pycache__/
+.playwright-profile/
