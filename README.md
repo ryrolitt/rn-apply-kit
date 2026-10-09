@@ -29,7 +29,7 @@ installer asks for it.
 | `scripts/export_pdf.sh` | docx to PDF with LibreOffice, and proves the PDF changed. |
 | `scripts/report.sh` | Emails your colleague a question or a problem report; opens a draft, you click Send. |
 | `scripts/check_package.py` | The gate before an upload: each PDF matches its Word file's current text, no tracked changes or `[CONFIRM` left, letter is one page, letterhead intact. `--hashes` records what was sent. |
-| `tests/` | Offline tests for the scripts: `python3 -m unittest discover -s tests`. |
+| `tests/` | Offline tests for the scripts, and for the rule sentences that must stay in the commands: `python3 -m unittest discover -s tests`. |
 | `scripts/update.sh` | Pulls kit updates; runs daily. Your files are never touched. |
 | `scripts/set-token.sh` | Stores the read-only token once the repos go private. |
 | `.claude/commands/` | `/intake-profile`, `/set-preferences`, `/start-next-app`, `/close-out-app`. |
