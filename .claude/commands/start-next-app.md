@@ -42,6 +42,12 @@ One application per session. Say at the start which NOT SENT packages exist
 - In the `playwright` MCP: start the application, prefer "apply manually" over resume parsing,
   fill every field from `profile/`, open optional sections and decide each, upload the PDFs,
   answer screening questions from the fact base (unknown answer: ask, do not guess).
+- The portal remembers the applicant. A second application at the same employer or vendor
+  account (Workday, UltiPro, Avature, SmartRecruiters) pre-loads the first one's stored
+  profile: read every pre-loaded row against the current resume before adding anything. After
+  an upload, open the portal's own preview of the resume or profile where it has one and read
+  it. One confirmed parser error at a vendor: re-check every unsent application at that vendor
+  in the same session.
 - Walk every page once more before handing over. Then say exactly what is left for them:
   the attestation checkbox, voluntary disclosures, Submit. Keep the browser window open.
 
