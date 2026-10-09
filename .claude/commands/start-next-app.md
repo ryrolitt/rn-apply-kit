@@ -40,8 +40,12 @@ One application per session. Say at the start which NOT SENT packages exist
   Exit 2 means nothing was checked: do what its one line says. Read the WARN lines. It cannot
   see a wrong fact or a weak sentence.
 - In the `playwright` MCP: start the application, prefer "apply manually" over resume parsing,
-  fill every field from `profile/`, open optional sections and decide each, upload the PDFs,
-  answer screening questions from the fact base (unknown answer: ask, do not guess).
+  fill every field from `profile/`, open optional sections and decide each, upload the PDFs.
+- Jobs, schools and screening answers come from `profile/form-facts-and-answers.md` (missing:
+  copy `templates/form-facts-and-answers.md` there). A banked answer is entered without asking
+  only when the question text and options match exactly and it has not expired; otherwise show
+  it as a proposal. A `[SESSION GUESS, ask]` value or a question with no entry is asked, never
+  guessed.
 - The portal remembers the applicant. A second application at the same employer or vendor
   account (Workday, UltiPro, Avature, SmartRecruiters) pre-loads the first one's stored
   profile: read every pre-loaded row against the current resume before adding anything. After

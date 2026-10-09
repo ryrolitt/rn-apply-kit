@@ -35,6 +35,7 @@ installer asks for it.
 | `.claude/commands/` | `/intake-profile`, `/set-preferences`, `/start-next-app`, `/close-out-app`. |
 | `.claude/skills/web-forms/` | How to drive ATS portals (Workday, UltiPro, CalCareers) without wrong values. |
 | `templates/profile/` | The files intake fills in: your facts, your anecdotes, your voice, your references. |
+| `templates/form-facts-and-answers.md` | Becomes `profile/form-facts-and-answers.md` at intake: each job and school as a form asks for it, and the screening answers you have already given, so a portal is filled without asking twice. |
 | `preferences.example.toml` | What a preferences file looks like. Yours is written by `/set-preferences`. |
 
 Your data (`profile/`, `Master Materials/`, `Applications/`, `tracker.json`, `preferences.toml`,

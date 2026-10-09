@@ -25,6 +25,9 @@ or certificates? Paste its path (or drag the folder into this chat). If not, say
     they clearly wrote themselves (an essay, a personal statement, an email). Not a template letter.
   - `profile/references.md`: names, titles, relationship, contact details found.
   - `profile/contact.md`: address, phone, email, LinkedIn as found.
+  - `profile/form-facts-and-answers.md` (copy `templates/form-facts-and-answers.md` first): one
+    block per job and per school with the dates, supervisor and location a form asks for, each
+    value tagged `[RECORD <file>]`. Part 2 stays empty: only answers they gave go there.
   - `profile/letterhead.txt`: the two lines their own letters open with (name line, contact
     line), only if their letters agree on them. `scripts/check_package.py` compares every
     letter against this file before an upload.
@@ -38,8 +41,9 @@ Present a single numbered list of everything still `[CONFIRM]` plus these if abs
 state and number, certifications with expiry, GPA per school, placements, two or three things
 they wrote themselves, references with contact details, home address and phone, the
 preferred name on applications, the two lines every letter should open with (for
-`profile/letterhead.txt`, written exactly as they give them). Say they can answer in any order and skip what they do not
-have. Write the answers in exactly as given.
+`profile/letterhead.txt`, written exactly as they give them). Say they can answer in any
+order and skip what they do not have. Write the answers in exactly as given; in
+`form-facts-and-answers.md` tag them `[APPLICANT <date>]`.
 
 ## 4. Finish
 - `python3 scripts/status.py --list` is empty at this point; skip it.

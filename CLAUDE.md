@@ -43,7 +43,8 @@ submitted, skip, rejected, interview, offer, withdrawn.
   validate). The applicant may edit in Word between sessions, so never regenerate a document
   from scratch over one that exists; edit it in place.
 - PDFs through `scripts/export_pdf.sh`, which fails loudly if the PDF did not change.
-- Before any upload, `scripts/check_package.py "Applications/<slug>" --id <id>`: exit 1 means do not upload.
+- Before any upload, `scripts/check_package.py "Applications/<slug>" --id <id>`: exit 1 means
+  do not upload.
 - One file name per document, globally searchable: `<Employer-Role>-Cover-Letter.docx`,
   `<Employer-Role>-Resume.docx`, ASCII, hyphens, no spaces or ampersands. Never a bare
   `Cover-Letter.pdf`.
@@ -64,6 +65,8 @@ Load the `web-forms` skill (`.claude/skills/web-forms/SKILL.md`) before the firs
 Use the `playwright` MCP; its browser profile keeps logins between sessions. Walk every
 field before handing the form over, optional sections included; anything a resume parser
 filled is a claim in the applicant's name and gets checked.
+Jobs, schools and banked screening answers for forms are in
+`profile/form-facts-and-answers.md`; its header rule says what is typed without asking.
 
 ## Capacity (Pro plan)
 No parallel agents, no exploratory file reads, no re-reading a file already read this
