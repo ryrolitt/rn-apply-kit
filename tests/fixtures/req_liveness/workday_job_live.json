@@ -1,0 +1,22 @@
+{
+ "jobPostingInfo": {
+  "id": "00000000000000000000000000000001",
+  "title": "Unit Clerk - Example Unit",
+  "location": "Anytown",
+  "postedOn": "Posted Today",
+  "startDate": "2026-01-10",
+  "timeType": "Part time",
+  "jobReqId": "REQ654321",
+  "jobPostingId": "Unit-Clerk---Example-Unit_REQ654321",
+  "jobPostingSiteId": "ExampleCareers",
+  "canApply": true,
+  "posted": true,
+  "externalUrl": "https://examplehealth.wd5.myworkdayjobs.com/ExampleCareers/job/Anytown/Unit-Clerk---Example-Unit_REQ654321",
+  "jobDescription": "(trimmed)"
+ },
+ "hiringOrganization": {
+  "name": "Example Hospital",
+  "url": ""
+ },
+ "userAuthenticated": false
+}

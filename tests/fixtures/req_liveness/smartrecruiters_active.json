@@ -1,0 +1,14 @@
+{
+ "id": "1234567890",
+ "name": "Registered Nurse - Example Unit",
+ "uuid": "00000000-0000-4000-8000-000000000001",
+ "refNumber": "REF0001A",
+ "company": {
+  "name": "Example County",
+  "identifier": "ExampleCounty"
+ },
+ "releasedDate": "2026-01-10T15:00:00.000Z",
+ "postingUrl": "https://jobs.smartrecruiters.com/ExampleCounty/1234567890-registered-nurse-example-unit",
+ "active": true,
+ "visibility": "PUBLIC"
+}

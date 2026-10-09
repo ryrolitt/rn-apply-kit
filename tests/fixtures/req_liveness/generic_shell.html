@@ -1,0 +1,16 @@
+<!-- synthetic: a JavaScript shell, the page a frame-based or script-rendered job site answers with -->
+<html><head>
+<script type="text/javascript" src="https://cdn.example.org/portal/script/common.js"></script>
+<script type="text/javascript">
+if (window.addEventListener) { window.addEventListener('message', handlePostMessage, false); }
+function handlePostMessage(event) {
+  if (event.origin.indexOf('example.org') == -1) return;
+  var data = event.data;
+  if (data && data.height && !isNaN(data.height)) { document.getElementById('content_iframe').height = data.height; }
+}
+</script>
+<style>body { margin: 0; } iframe { border: 0; width: 100%; }</style>
+</head><body>
+<noscript>Please enable JavaScript to view this page.</noscript>
+<iframe id="content_iframe" title="Job" src="about:blank"></iframe>
+</body></html>

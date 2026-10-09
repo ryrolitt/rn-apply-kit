@@ -1,0 +1,7 @@
+{
+ "errorCode": "S22",
+ "errorCaseId": "EXAMPLECASE0001",
+ "httpStatus": 403,
+ "message": "permission denied",
+ "messageParams": {}
+}

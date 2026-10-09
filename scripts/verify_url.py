@@ -5,6 +5,10 @@
   - close_at: parsed close datetime if the page text states one (else None)
   - close_source_text: the raw matched snippet (for the audit log)
   - posting_gone_reason: short string explaining why is_live=False (else None)
+  - liveness, liveness_method, liveness_evidence: the requisition-level answer from
+    req_liveness.py, which asks the employer's job system about the requisition itself
+    and may say "uncertain". `is_live` stays a bool: True for live AND uncertain, False
+    for gone (and, as before, when the posting page itself did not answer or gave a 5xx).
 
 NO LLM. Plain regex + heuristics, scoped to ATS patterns we've observed in
 this project's nursing job pipeline (Workday, SmartRecruiters, LinkedIn,
@@ -25,12 +29,20 @@ and the daemon falls back to the YAML-declared close_at.
 from __future__ import annotations
 
 import re
+import sys
 from dataclasses import dataclass
 from datetime import datetime, timedelta
+from pathlib import Path
 from typing import Optional
 from zoneinfo import ZoneInfo
 
 import requests
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+try:
+    import req_liveness          # same directory; the requisition-level check
+except Exception:                # the page evidence still works without it
+    req_liveness = None
 
 PACIFIC = ZoneInfo("America/Los_Angeles")
 USER_AGENT = (
@@ -120,6 +132,9 @@ class VerifyResult:
     close_source_text: Optional[str]
     posting_gone_reason: Optional[str]
     fetched_at: datetime
+    liveness: str = "uncertain"         # live | gone | uncertain
+    liveness_method: str = ""           # which check decided
+    liveness_evidence: str = ""         # the observation, short
 
 
 def _to_24h(hour: int, ampm: Optional[str]) -> int:
@@ -235,20 +250,45 @@ def verify(url: str) -> VerifyResult:
             close_source_text=None,
             posting_gone_reason=f"network_error:{type(e).__name__}",
             fetched_at=fetched_at,
+            liveness="uncertain",
+            liveness_method="page_fetch",
+            liveness_evidence=f"the posting URL did not answer: {type(e).__name__}",
         )
 
     text_simple = re.sub(r"\s+", " ", text)
     close_at, snippet = parse_close_date(text_simple)
     gone = detect_posting_gone(text_simple, status)
 
+    # A page without a "gone" phrase is not proof the job is open: a careers home page, a
+    # JavaScript shell and a closed announcement that stays online all pass. req_liveness
+    # asks the employer's system about the requisition itself and may answer "uncertain".
+    page_blip = bool(gone) and gone.startswith(("network_error", "http_5"))
+    try:
+        lv = req_liveness.check(url, status, r.url, text, gone)
+        liveness, method, evidence = lv.state, lv.method, lv.evidence
+        if lv.state == "gone":
+            is_live, gone = False, lv.reason
+        elif lv.state == "live":
+            is_live, gone = True, None
+        else:                        # uncertain: not gone; a page that gave a 5xx stays not live
+            is_live, gone = (not page_blip), (gone if page_blip else None)
+    except Exception as e:           # the old answer stands if the new check breaks
+        is_live = gone is None
+        liveness = "gone" if (gone and not page_blip) else "uncertain"
+        method = "liveness_check_failed"
+        evidence = f"req_liveness did not run ({type(e).__name__}); page evidence only"
+
     return VerifyResult(
         url=url,
         http_status=status,
-        is_live=(gone is None),
+        is_live=is_live,
         close_at=close_at,
         close_source_text=snippet,
         posting_gone_reason=gone,
         fetched_at=fetched_at,
+        liveness=liveness,
+        liveness_method=method,
+        liveness_evidence=evidence,
     )
 
 
@@ -263,3 +303,4 @@ if __name__ == "__main__":
         print(f"   http {rv.http_status}  live={rv.is_live}  gone={rv.posting_gone_reason}")
         print(f"   close_at={rv.close_at}")
         print(f"   snippet={rv.close_source_text!r}")
+        print(f"   liveness={rv.liveness}  method={rv.liveness_method}  evidence={rv.liveness_evidence}")

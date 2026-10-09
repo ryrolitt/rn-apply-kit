@@ -1,0 +1,11 @@
+{
+ "absolute_url": "https://job-boards.greenhouse.io/examplehealth/jobs/123456",
+ "id": 123456,
+ "internal_job_id": 100001,
+ "requisition_id": "R-1",
+ "title": "Registered Nurse - Example Unit",
+ "updated_at": "2026-01-10T13:00:00-05:00",
+ "first_published": "2026-01-10T13:00:00-05:00",
+ "company_name": "Example Health",
+ "content": "(trimmed)"
+}

@@ -1,0 +1,16 @@
+{
+ "total": 1,
+ "jobPostings": [
+  {
+   "title": "Unit Clerk - Example Unit",
+   "externalPath": "/job/Anytown/Unit-Clerk---Example-Unit_REQ654321",
+   "locationsText": "Anytown",
+   "postedOn": "Posted Today",
+   "bulletFields": [
+    "REQ654321"
+   ]
+  }
+ ],
+ "facets": [],
+ "userAuthenticated": false
+}
