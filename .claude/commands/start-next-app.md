@@ -35,6 +35,10 @@ One application per session. Say at the start which NOT SENT packages exist
 
 ## 4. Portal
 - Load `.claude/skills/web-forms/SKILL.md` and its `references/site-notes.md` first.
+- Before any upload: `.venv/bin/python3 scripts/check_package.py "Applications/<slug>" --id <id>`.
+  Exit 1 is a stop: fix each FAIL (it prints the differing sentence), export again, re-run.
+  Exit 2 means nothing was checked: do what its one line says. Read the WARN lines. It cannot
+  see a wrong fact or a weak sentence.
 - In the `playwright` MCP: start the application, prefer "apply manually" over resume parsing,
   fill every field from `profile/`, open optional sections and decide each, upload the PDFs,
   answer screening questions from the fact base (unknown answer: ask, do not guess).

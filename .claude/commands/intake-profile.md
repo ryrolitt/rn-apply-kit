@@ -25,6 +25,9 @@ or certificates? Paste its path (or drag the folder into this chat). If not, say
     they clearly wrote themselves (an essay, a personal statement, an email). Not a template letter.
   - `profile/references.md`: names, titles, relationship, contact details found.
   - `profile/contact.md`: address, phone, email, LinkedIn as found.
+  - `profile/letterhead.txt`: the two lines their own letters open with (name line, contact
+    line), only if their letters agree on them. `scripts/check_package.py` compares every
+    letter against this file before an upload.
 - Copy the most recent resume to `Master Materials/<Name>-Resume-Master.<ext>` (keep the original
   untouched in their folder).
 - Mark every field you could not fill `[CONFIRM: ...]`. Where two documents disagree, write both
@@ -34,7 +37,8 @@ or certificates? Paste its path (or drag the folder into this chat). If not, say
 Present a single numbered list of everything still `[CONFIRM]` plus these if absent: license
 state and number, certifications with expiry, GPA per school, placements, two or three things
 they wrote themselves, references with contact details, home address and phone, the
-preferred name on applications. Say they can answer in any order and skip what they do not
+preferred name on applications, the two lines every letter should open with (for
+`profile/letterhead.txt`, written exactly as they give them). Say they can answer in any order and skip what they do not
 have. Write the answers in exactly as given.
 
 ## 4. Finish

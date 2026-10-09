@@ -43,6 +43,7 @@ submitted, skip, rejected, interview, offer, withdrawn.
   validate). The applicant may edit in Word between sessions, so never regenerate a document
   from scratch over one that exists; edit it in place.
 - PDFs through `scripts/export_pdf.sh`, which fails loudly if the PDF did not change.
+- Before any upload, `scripts/check_package.py "Applications/<slug>" --id <id>`: exit 1 means do not upload.
 - One file name per document, globally searchable: `<Employer-Role>-Cover-Letter.docx`,
   `<Employer-Role>-Resume.docx`, ASCII, hyphens, no spaces or ampersands. Never a bare
   `Cover-Letter.pdf`.
