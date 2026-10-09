@@ -5,13 +5,19 @@ One list, everything on it, most important first. Postings you have finished wit
 skip, rejected, ...) and postings excluded by your preferences are still on the page, below
 the fold, with the reason. Nothing is silently dropped.
 
+A ranked row is labeled, never moved, when it is a sibling of an application already sent
+(same employer and unit, only the shift or hours differ: a short send) or when its portal
+already holds an account from an earlier application.
+
 Usage: python3 scripts/rank.py [--top N]
 Change preferences by re-running /set-preferences, not by editing the file by hand.
 """
 import datetime
+import functools
 import html
 import json
 import os
+import re
 import sys
 import tomllib
 
@@ -167,6 +173,134 @@ def score(p, prefs, today):
     return s, reasons
 
 
+# --- Sibling labels ---------------------------------------------------------------------
+# A sibling is a posting at the same employer and unit as an application that already went
+# out, where only the shift or hours differ. Those are the short sends: the letter and the
+# portal profile exist. A different job on a portal where an account already exists is a
+# shorter form but still a new letter. This only LABELS a row; the order stays the score.
+SENT = ("submitted", "interview", "offer", "rejected")
+_SCHEDULE_WORDS = set("""
+full time part per diem on call noc night nights day days evening evenings pm am
+shift shifts dayshift nightshift variable regular rotating hour hours hr hrs fte ft pt prn
+pool weekend weekends limited term temporary benefited onsite
+the and of a an at in for to req job posted ca
+""".split())
+_GENERIC_TITLE = {"registered", "nurse", "staff", "clinical", "ii", "iii", "iv"}
+_PLACE_WORDS = {"united", "states", "america", "usa", "california"}
+# Hosts where one login covers every requisition, so a second application starts from a
+# stored profile. Value: how many leading path segments name the tenant.
+_ACCOUNT_HOSTS = (
+    ("ultipro.com", 1), ("myworkdayjobs.com", 0), ("icims.com", 0),
+    ("smartrecruiters.com", 1), ("avature.net", 0), ("usajobs.gov", 0),
+    ("governmentjobs.com", 0), ("calcareers.ca.gov", 0), ("oraclecloud.com", 0),
+)
+
+
+@functools.lru_cache(maxsize=None)
+def _core_tokens(text):
+    """Lowercase word set with schedule words, hours, FTE, requisition ids and dates
+    removed. Two and three digit numbers stay: some employers write the unit into the
+    title as a number, and 204 against 205 is then the whole difference between two sites."""
+    text = re.sub(r"\brn\b", " registered nurse ", (text or "").lower())
+    text = re.sub(r"\b\d{1,2}/\d{1,2}(/\d{2,4})?\b", " ", text)              # 'posted 2/14'
+    text = re.sub(r"\d*\.\d+", " ", text)                                    # 0.9 FTE, .90
+    text = re.sub(r"\b\d{1,2}\s*-?\s*(?:hrs?|hours?|am|pm|a|p)\b", " ", text)  # 12-hour, 8am, 7a-7p
+    text = re.sub(r"\b\w*\d{4,}\w*\b", " ", text)                            # RN0012345, JR0001234
+    out = set()
+    for w in re.findall(r"[a-z0-9]+", text):
+        if w.isdigit():
+            if 2 <= len(w) <= 3:
+                out.add(w)
+            continue
+        if len(w) > 1 and w not in _SCHEDULE_WORDS:
+            out.add(w)
+    return frozenset(out)
+
+
+def _overlap(a, b):
+    return len(a & b) / min(len(a), len(b)) if a and b else 0.0
+
+
+def portal_key(url):
+    """Tenant-level key for account-based portals, else None."""
+    m = re.match(r"https?://([^/:?#]+)(?::\d+)?(/[^?#]*)?", url or "")
+    if not m:
+        return None
+    host, path = m.group(1).lower().removeprefix("www."), (m.group(2) or "")
+    for suffix, nseg in _ACCOUNT_HOSTS:
+        if host == suffix or host.endswith("." + suffix):
+            segs = [x for x in path.split("/") if x][:nseg]
+            return "/".join([host] + [x.lower() for x in segs])
+    return None
+
+
+def _same_place(a, b):
+    """False only when both postings name a city and the cities differ."""
+    for get in (lambda p: (p.get("screen") or {}).get("work_city"),
+                lambda p: (p.get("location") or "").split(",")[0]):
+        x, y = (get(a) or "").strip().lower(), (get(b) or "").strip().lower()
+        if x and y:
+            return x == y
+    return True
+
+
+def _unit_tokens(p):
+    """What a title says beyond 'Registered Nurse' and the posting's own city: the unit,
+    the specialty, the role."""
+    place = _core_tokens(p.get("location")) | _core_tokens((p.get("screen") or {}).get("work_city"))
+    return _core_tokens(p.get("title")) - place - _PLACE_WORDS - _GENERIC_TITLE
+
+
+def is_sibling(p, sent):
+    """Same employer, same unit, same role; only the schedule differs."""
+    if _overlap(_core_tokens(p.get("employer")), _core_tokens(sent.get("employer"))) < 0.8:
+        return False
+    if not _same_place(p, sent):
+        return False
+    a, b = _unit_tokens(p), _unit_tokens(sent)
+    if not a & b:
+        return False           # 'Registered Nurse' alone proves nothing
+    na, nb = {w for w in a if w.isdigit()}, {w for w in b if w.isdigit()}
+    if na and nb and not (na & nb):
+        return False           # both name a unit number and they differ
+    # Nearly all of the shorter title is in the longer one, and the longer one does not
+    # add much: 'ICU' against 'ICU Cardiac Surgery' is another unit, not another shift.
+    return _overlap(a, b) >= 0.8 and len(a & b) / max(len(a), len(b)) >= 0.6
+
+
+def label_siblings(rows, postings):
+    """Set or clear `sibling_of` / `same_portal_as` (a posting id) and `label` (the text
+    shown) on every ranked row. `postings` is tracker.json's id -> posting map. A rejected
+    sibling is labeled too: being turned down for the same unit is worth seeing before
+    building. Nothing is written to tracker.json and no row moves."""
+    sent = sorted((s for s in postings.values() if s.get("status") in SENT),
+                  key=lambda s: str(s.get("status_at") or ""), reverse=True)
+    for r in rows:
+        p = r["p"]
+        for field in ("sibling_of", "same_portal_as", "label"):
+            r.pop(field, None)
+        sib = next((s for s in sent if is_sibling(p, s)), None)
+        if sib:
+            r["sibling_of"], r["label"] = sib.get("id"), sibling_note(sib)
+            continue
+        key = portal_key(p.get("url"))
+        portal = next((s for s in sent if portal_key(s.get("url")) == key), None) if key else None
+        if portal:
+            r["same_portal_as"] = portal.get("id")
+            r["label"] = f"portal account exists ({(portal.get('employer') or '')[:24]})"
+
+
+def sibling_note(sent):
+    """The label for a sibling of the already-sent posting `sent`."""
+    title, when = (sent.get("title") or "")[:40], str(sent.get("status_at") or "")[:10]
+    status = sent.get("status")
+    if status == "rejected":
+        return f"sibling of {title}, REJECTED there {when}"
+    if status == "submitted":
+        return f"sibling of {title}, sent {when}: short send"
+    return f"sibling of {title}, {status} since {when}: short send"
+
+
 def render(rows, working, excluded, done, gone, prefs, today):
     def esc(x):
         return html.escape(str(x if x is not None else ""))
@@ -176,12 +310,13 @@ def render(rows, working, excluded, done, gone, prefs, today):
         sc = p.get("screen") or {}
         new = p.get("first_seen_at") and (today - datetime.date.fromisoformat(p["first_seen_at"][:10])).days <= 2
         badge = '<span class="new">NEW</span> ' if new else ""
+        label = f"<b>{esc(r['label'])}</b>; " if r.get("label") else ""
         return (f"<tr><td>{r.get('rank', '')}</td><td>{r.get('score', '') if show_score else ''}</td>"
                 f"<td>{esc(p.get('employer'))}</td><td>{badge}<a href=\"{esc(p.get('url'))}\">{esc(p.get('title'))}</a></td>"
                 f"<td>{esc(p.get('location') or sc.get('work_city'))}</td>"
                 f"<td>{'' if sc.get('new_grad_ok') is None else ('yes' if sc.get('new_grad_ok') else 'no')}</td>"
                 f"<td>{esc((p.get('close_at') or '')[:10])}</td><td>{esc(p.get('status'))}</td>"
-                f"<td class=q>{esc('; '.join(r.get('reasons', [])))}</td><td class=id>{esc(p.get('id'))}</td></tr>")
+                f"<td class=q>{label}{esc('; '.join(r.get('reasons', [])))}</td><td class=id>{esc(p.get('id'))}</td></tr>")
 
     head = ("<tr><th>#</th><th>Score</th><th>Employer</th><th>Title</th><th>Location</th><th>New grad</th>"
             "<th>Closes</th><th>Status</th><th>Why</th><th>id</th></tr>")
@@ -244,11 +379,14 @@ def main():
     for i, r in enumerate(rows, 1):
         r["rank"] = i
     working.sort(key=lambda r: -r["age"])
+    label_siblings(rows, t["postings"])
     open(OUT_HTML, "w").write(render(rows, working, excluded, done, gone, prefs, today))
     json.dump({"ranked_at": today.isoformat(),
                "ranked": [{"rank": r["rank"], "score": r["score"], "id": r["p"]["id"], "employer": r["p"].get("employer"),
                            "title": r["p"].get("title"), "url": r["p"].get("url"), "status": r["p"].get("status"),
-                           "reasons": r["reasons"]} for r in rows],
+                           "reasons": r["reasons"],
+                           **{k: r[k] for k in ("label", "sibling_of", "same_portal_as") if r.get(k)}}
+                          for r in rows],
                "working_not_sent": [{"id": r["p"]["id"], "age_days": r["age"], "title": r["p"].get("title")} for r in working],
                "excluded": [{"id": r["p"]["id"], "reasons": r["reasons"]} for r in excluded]},
               open(OUT_JSON, "w"), indent=1)
@@ -256,7 +394,8 @@ def main():
     for r in working:
         print(f"  NOT SENT {r['age']}d: {r['p'].get('employer')} | {r['p'].get('title')} | {r['p']['id']}")
     for r in rows[:top_n]:
-        print(f"  {r['rank']:>3}. {r['score']:>3}  {r['p'].get('employer')} | {r['p'].get('title')} | {r['p']['id']}")
+        print(f"  {r['rank']:>3}. {r['score']:>3}  {r['p'].get('employer')} | {r['p'].get('title')} | {r['p']['id']}"
+              + (f" | {r['label']}" if r.get("label") else ""))
     return 0
 
 

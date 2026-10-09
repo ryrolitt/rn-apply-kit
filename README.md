@@ -23,7 +23,7 @@ installer asks for it.
 | `CLAUDE.md` | The rules Claude follows in this project. Read once; they explain the why. |
 | `install.sh` | Checks tools, sets up the Playwright browser, pulls the feed, installs the daily cron job. |
 | `scripts/fetch_feed.py` | Pulls the openings feed into `tracker.json`, keeping your statuses. |
-| `scripts/rank.py` | Orders everything by `preferences.toml`, writes `ranked.html`. |
+| `scripts/rank.py` | Orders everything by `preferences.toml`, writes `ranked.html`. Labels a row that is a sibling of an application you already sent (same employer and unit, another shift), or whose portal already has your account. |
 | `scripts/status.py` | The one way to change a posting's status. |
 | `scripts/verify_url.py` | Checks a posting is still live and reads a close date from the page. |
 | `scripts/export_pdf.sh` | docx to PDF with LibreOffice, and proves the PDF changed. |
