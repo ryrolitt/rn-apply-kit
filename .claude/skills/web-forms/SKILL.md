@@ -49,15 +49,22 @@ into a portal at the END of the document, outside the control's subtree, and exi
 open. If the list is virtualized (about ten options visible), type-to-filter is the only
 reliable path.
 
-**Click-the-option** when typing does not filter: open, snapshot, find the `option` role near
-the bottom of the tree, click it, verify.
+**Not on a single-page form.** On a form whose Submit button is on the page being filled and
+that keeps no saved state (Greenhouse-hosted forms, most no-account apply pages), never press
+Enter in a field: if the list has closed or never opened, Enter in a text input is the
+browser's implicit form submit, and the application goes out half filled. Type to filter, then
+`browser_click` the option. Note the URL path before filling and confirm it is unchanged
+after. Multi-step wizards with their own Next button (Workday) are the normal case for Enter.
+
+**Click-the-option** when typing does not filter, and always on a single-page form: open,
+snapshot, find the `option` role near the bottom of the tree, click it, verify.
 
 **Date pickers.** Type the date in the format the placeholder shows, then Tab or Escape to close
 the calendar. Drive the grid only if typed text is rejected; snapshot after every month click.
 Some portals hide the real input behind a display div (Workday: see site notes).
 
 **Typeaheads with pills** (school, field of study, license): type, wait for the suggestion,
-click the suggestion or press Enter, verify the pill.
+click the suggestion (or press Enter, in a multi-step wizard only), verify the pill.
 
 **Search boxes that swallow the first keystrokes.** Click the box alone first, snapshot to see
 it expanded, then type in a second call.
