@@ -25,7 +25,8 @@ installer asks for it.
 | `scripts/fetch_feed.py` | Pulls the openings feed into `tracker.json`, keeping your statuses. |
 | `scripts/rank.py` | Orders everything by `preferences.toml`, writes `ranked.html`. Labels a row that is a sibling of an application you already sent (same employer and unit, another shift), or whose portal already has your account. |
 | `scripts/status.py` | The one way to change a posting's status. |
-| `scripts/verify_url.py` | Checks a posting is still live and reads a close date from the page. |
+| `scripts/verify_url.py` | Checks a posting is still open (`live`, `gone` or `uncertain`, with the evidence) and reads a close date from the page. |
+| `scripts/req_liveness.py` | The check behind that answer: asks the employer's job system (Workday, Greenhouse, SmartRecruiters, Oracle, UltiPro, iCIMS, USAJobs, NEOGOV) about the requisition itself. Only an authoritative signal says `gone`; anything unclear is `uncertain` and gets read in the browser. |
 | `scripts/export_pdf.sh` | docx to PDF with LibreOffice, and proves the PDF changed. |
 | `scripts/report.sh` | Emails your colleague a question or a problem report; opens a draft, you click Send. |
 | `scripts/check_package.py` | The gate before an upload: each PDF matches its Word file's current text, no tracked changes or `[CONFIRM` left, letter is one page, letterhead intact. `--hashes` records what was sent. |

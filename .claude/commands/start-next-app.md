@@ -5,7 +5,10 @@ One application per session. Say at the start which NOT SENT packages exist
 (`python3 scripts/status.py --list working`).
 
 ## 1. Verify the posting (before any writing)
-- `.venv/bin/python3 scripts/verify_url.py <url>`. Not live: `status.py <id> skip "posting gone <date>"`, stop.
+- `.venv/bin/python3 scripts/verify_url.py <url>` and read its `liveness=` line. `gone`:
+  `status.py <id> skip "<evidence>"`, stop. `live`: go on. `uncertain`: the script could not
+  confirm the requisition, so open it in the `playwright` MCP and read the page before any
+  writing; closed there is a skip too.
 - Open it in the `playwright` MCP, `browser_snapshot`, read the full description. Record in
   `Applications/<slug>/INTAKE.md`: the verbatim experience requirement, license and
   certification requirements, "open to" or internal-only language, the close date exactly
