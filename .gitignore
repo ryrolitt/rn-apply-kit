@@ -1,5 +1,5 @@
 # Your data never goes into this repo. Pulling kit updates can never touch these.
-profile/
+/profile/
 Master Materials/
 Applications/
 tracker.json
